@@ -1,8 +1,4 @@
-const app = require('express')()
-const http = require('http').Server(app)
-const bodyParser = require('body-parser')
-let io = require('socket.io')
-const cors = require('cors')
+const app = require('http').Server()
 const dotenv = require('dotenv')
 const fs = require('fs')
 const fetch = require('isomorphic-unfetch')
@@ -20,8 +16,9 @@ const cmsUrl = process.env.CMS_URL
 const refreshTimer = process.env.REFRESH_TIMER
 const dbCtrlUrl = process.env.DB_CTRL_URL
 
-app.use(cors())
-app.use(bodyParser.json())
+const server = app.listen(port, () =>
+  console.log(`> ready on ${server.address().port}`)
+)
 
 const modifyPost = async (wp, p, cats) => {
   p = await postMod.getFeatureSrc(p, wp)

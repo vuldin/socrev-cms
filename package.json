@@ -1,18 +1,11 @@
 {
   "name": "socrev-cms",
-  "description": "Provide CMS functionality for socialistrevolution.org",
+  "description": "provide CMS functionality",
   "private": true,
   "scripts": {
     "start": "node index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gitlab.com/marxist/socrev-cms.git"
-  },
   "license": "ISC",
-  "bugs": {
-    "url": "https://gitlab.com/marxist/socrev-cms/issues"
-  },
   "dependencies": {
     "dotenv": "^4.0.0",
     "isomorphic-unfetch": "^2.0.0",

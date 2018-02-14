@@ -160,7 +160,7 @@ const main = async () => {
     await refresh()
   } catch (e) {
     if (e.name === 'FetchError')
-      console.log(`failed connecting to ${dbCtrlUrl}`)
+      console.log(`failed connecting to ${dbCtrlUrl} (will retry later)`)
     console.log(e)
   }
   setInterval(async () => {
@@ -169,7 +169,7 @@ const main = async () => {
       await refresh()
     } catch (e) {
       if (e.name === 'FetchError')
-        console.log(`failed connecting to ${dbCtrlUrl}`)
+        console.log(`failed connecting to ${dbCtrlUrl} (will retry later)`)
       else console.log(e)
     }
     console.log(`next refresh in ${refreshTimer}ms`)

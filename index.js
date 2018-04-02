@@ -54,6 +54,7 @@ const modifyPost = async (wp, p, cats, wpTags) => {
     media: '',
     content: '',
     tags: [],
+    order: 99,
   }
 
   // categories
@@ -141,7 +142,7 @@ const refresh = async () => {
   const wpCats = await wp.categories().perPage(100)
   const cats = modCats(wpCats)
   if (!isEqual(modCats(dbMods.cats), cats)) {
-    // socrev-db categories must be updated
+    // categories are always updated since wordpress doesn't report when they are modified
     console.log('> sending category updates to dbCtrl...')
     const updatesRes = await fetch(`${dbCtrlUrl}/updates`, {
       method: 'POST',
@@ -189,7 +190,6 @@ const refresh = async () => {
       modPosts = await wp
         .posts()
         .status(['trash', 'draft', 'future', 'publish'])
-        //.orderby('modified')
         .orderby(`${dbEmpty ? 'id' : 'modified'}`)
         .order(`${dbEmpty ? 'asc' : 'desc'}`)
         .page(page)
@@ -201,7 +201,7 @@ const refresh = async () => {
     */
     let p = Array.isArray(modPosts) ? modPosts[0] : modPosts // p is not array if request an id
 
-    // add unique ids for each post we pull from wordpress
+    // add unique ids for each post we pull from wordpress (for logging only)
     if (!pulls.includes(p.id)) pulls.push(p.id)
 
     let cmsPostModDate = new Date(p.modified).getTime()
@@ -240,27 +240,31 @@ const refresh = async () => {
           console.error(updatesRes)
         }
       }
+    } else {
+      //if (modPosts._paging.links.next === undefined) {
+      console.log(`> db in sync, refresh in ${refreshTimer / 1000 / 60}mins`)
+      moreMods = false
+      /*
+      const pullsFileUrl = '/Users/joshua/projects/imt/pulls.json'
+      const pushesFileUrl = '/Users/joshua/projects/imt/pushes.json'
+      fs.writeFileSync(pullsFileUrl, JSON.stringify(pulls))
+      fs.writeFileSync(pushesFileUrl, JSON.stringify(pushes))
+      */
+      console.log(`> unique pulls=>pushes: ${pulls.length}=>${pushes.length}`)
+      /*
+      if (pulls.length !== pushes.length) {
+        console.error(
+          `> number of pulls from wordpress do not match the number of pushes to mongo!`
+        )
+        const pushDiffs = pushes.filter(push => !pulls.includes(push))
+        const pullDiffs = pulls.filter(pull => !pushes.includes(pull))
+        if (pushDiffs.length > 0)
+          console.error(`pushes not in pull:\n${pushDiffs}`)
+        if (pullDiffs.length > 0)
+          console.error(`pulls not in push:\n${pullDiffs}`)
+      }
+      */
     }
-    //if (modPosts._paging.links.next === undefined) {
-    console.log(`> db in sync, refresh in ${refreshTimer / 1000 / 60}mins`)
-    moreMods = false
-    const pullsFileUrl = '/Users/joshua/projects/imt/pulls.json'
-    const pushesFileUrl = '/Users/joshua/projects/imt/pushes.json'
-    fs.writeFileSync(pullsFileUrl, JSON.stringify(pulls))
-    fs.writeFileSync(pushesFileUrl, JSON.stringify(pushes))
-    console.log(`> unique pulls=>pushes: ${pulls.length}=>${pushes.length}`)
-    if (pulls.length !== pushes.length) {
-      console.error(
-        `> number of pulls from wordpress do not match the number of pushes to mongo!`
-      )
-      const pushDiffs = pushes.filter(push => !pulls.includes(push))
-      const pullDiffs = pulls.filter(pull => !pushes.includes(pull))
-      if (pushDiffs.length > 0)
-        console.error(`pushes not in pull:\n${pushDiffs}`)
-      if (pullDiffs.length > 0)
-        console.error(`pulls not in push:\n${pullDiffs}`)
-    }
-    //}
   }
 
   // loop to pull a post while there are more updates
